@@ -10,7 +10,7 @@ git add .
 git commit -m "Initial commit: Online Debate Platform"
 
 # Create GitHub repo and push
-git remote add origin https://github.com/YOUR_USERNAME/debate-platform.git
+git remote add origin https://github.com/ZOtherMod/DebateSite.git
 git branch -M main
 git push -u origin main
 ```
