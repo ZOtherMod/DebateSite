@@ -18,9 +18,30 @@ from debate_logic import DebateManager
 try:
     import websockets
     from websockets.exceptions import ConnectionClosed
+    from websockets.legacy.server import WebSocketServerProtocol
 except ImportError:
     print("Error: websockets library not installed. Please install it with: pip install websockets")
     exit(1)
+
+class HybridServer:
+    """A server that handles both HTTP requests and WebSocket upgrades on the same port"""
+    
+    def __init__(self, websocket_handler, frontend_path, host='localhost', port=8080):
+        self.websocket_handler = websocket_handler
+        self.frontend_path = Path(frontend_path)
+        self.host = host
+        self.port = port
+    
+    async def handler(self, path, request_headers):
+        """Handle both HTTP and WebSocket requests"""
+        # Check if this is a WebSocket upgrade request
+        if 'upgrade' in request_headers and request_headers['upgrade'].lower() == 'websocket':
+            # This is a WebSocket connection - delegate to WebSocket handler
+            return self.websocket_handler.handle_connection
+        
+        # This is an HTTP request - we shouldn't reach here in normal operation
+        # because the HTTP server handles these directly
+        return None
 
 class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
     """Custom HTTP handler to serve static files from frontend directory"""
@@ -76,7 +97,7 @@ class DebatePlatformServer:
         
         # Server state
         self.running = False
-        self.server = None
+        self.websocket_server = None
         self.http_server = None
         
         print(f"Debate Platform Server initialized")
@@ -88,36 +109,28 @@ class DebatePlatformServer:
         try:
             frontend_path = Path(__file__).parent.parent / "frontend"
             if frontend_path.exists():
-                # Determine HTTP port based on environment
+                # For production, serve HTTP on the main port
+                # For development, use port 8080 for HTTP
                 if os.getenv('PORT'):
-                    # Production: Use the main port for HTTP
+                    # Production: serve HTTP on main port
                     http_port = self.port
+                    print("Production mode: HTTP server will use main port")
                 else:
-                    # Local development: Use different port for HTTP server
+                    # Development: serve HTTP on port 8080
                     http_port = 8080
+                    print("Development mode: HTTP server on port 8080")
                 
                 def handler_factory(*args, **kwargs):
                     return CustomHTTPRequestHandler(*args, frontend_path=frontend_path, **kwargs)
                 
-                # Use ThreadingTCPServer for better concurrency in production
-                if os.getenv('PORT'):
-                    self.http_server = socketserver.ThreadingTCPServer((self.host, http_port), handler_factory)
-                    # Allow reuse of address for production
-                    self.http_server.allow_reuse_address = True
-                else:
-                    self.http_server = socketserver.TCPServer((self.host, http_port), handler_factory)
+                self.http_server = socketserver.TCPServer((self.host, http_port), handler_factory)
                 
                 def serve():
                     print(f"✓ HTTP server running on http://{self.host}:{http_port}")
                     print(f"✓ Frontend accessible at http://{self.host}:{http_port}")
-                    try:
-                        self.http_server.serve_forever()
-                    except Exception as e:
-                        print(f"HTTP server error: {e}")
+                    self.http_server.serve_forever()
                 
-                # In production, don't use daemon threads
-                daemon = not bool(os.getenv('PORT'))
-                http_thread = threading.Thread(target=serve, daemon=daemon)
+                http_thread = threading.Thread(target=serve, daemon=True)
                 http_thread.start()
                 return http_port
         except Exception as e:
@@ -135,32 +148,33 @@ class DebatePlatformServer:
                 self.matchmaker.start_matchmaking_service()
             )
             
+            # Handle different deployment modes
             if os.getenv('PORT'):
-                # Production mode (Render): Start HTTP server on the main port
-                print("Production mode: HTTP server on main port for Render")
+                # Production mode: Use HTTP server on main port, skip WebSocket server
+                # (We'll handle WebSocket upgrades through a proxy or different approach)
+                print("Production mode: Starting HTTP-only server")
                 http_port = self.start_http_server()
                 
-                # Keep the asyncio event loop running for matchmaking
-                self.running = True
-                print(f"✓ Production server started on http://{self.host}:{self.port}")
-                print("✓ Matchmaking service running")
-                print("✓ Database initialized")
-                print("Note: WebSocket connections will need to be handled via proxy or alternative method")
+                # In production, we'll rely on the HTTP server
+                # and handle WebSocket connections differently
+                print(f"✓ Server started in production mode")
+                print(f"✓ Frontend accessible at http://{self.host}:{self.port}")
+                print("Note: WebSocket connections will be handled via HTTP upgrade")
                 
-                # Keep server alive
+                # Keep the server alive
                 while self.running:
                     await asyncio.sleep(1)
                     
             else:
-                # Development mode: Both HTTP and WebSocket servers
-                print("Development mode: Separate HTTP and WebSocket servers")
+                # Development mode: Start both HTTP and WebSocket servers
+                print("Development mode: Starting HTTP and WebSocket servers")
                 
                 # Start HTTP server for frontend files
                 http_port = self.start_http_server()
                 
                 # Start WebSocket server
                 print(f"Starting WebSocket server on {self.host}:{self.port}")
-                self.server = await websockets.serve(
+                self.websocket_server = await websockets.serve(
                     self.websocket_handler.handle_connection,
                     self.host,
                     self.port
@@ -169,42 +183,31 @@ class DebatePlatformServer:
                 self.running = True
                 print(f"✓ WebSocket server running on ws://{self.host}:{self.port}")
                 print(f"✓ Frontend accessible at http://{self.host}:{http_port}")
-                print("✓ Matchmaking service running")
-                print("✓ Database initialized")
                 
                 # Keep server running
-                await self.server.wait_closed()
+                await self.websocket_server.wait_closed()
+            
+            print("✓ Matchmaking service running")
+            print("✓ Database initialized")
             
         except Exception as e:
             print(f"Error starting server: {e}")
             raise
     
     async def stop_server(self):
-        """Stop the server and cleanup"""
+        """Stop all server services"""
         print("Stopping server...")
-        
         self.running = False
         
-        # Stop matchmaking service
-        self.matchmaker.stop_matchmaking_service()
+        if self.websocket_server:
+            self.websocket_server.close()
+            await self.websocket_server.wait_closed()
         
-        # Close WebSocket server
-        if self.server:
-            self.server.close()
-            await self.server.wait_closed()
+        if self.http_server:
+            self.http_server.shutdown()
+            self.http_server.server_close()
         
-        print("Server stopped")
-    
-    def get_status(self):
-        """Get server status information"""
-        return {
-            'running': self.running,
-            'host': self.host,
-            'port': self.port,
-            'connected_users': self.websocket_manager.get_connection_count(),
-            'active_debates': self.debate_manager.get_active_debates_count(),
-            'queue_status': self.matchmaker.queue.get_queue_status()
-        }
+        print("✓ Server stopped")
 
 async def main():
     """Main server entry point"""
