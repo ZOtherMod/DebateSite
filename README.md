@@ -1,22 +1,24 @@
 # Online Debate Platform
 
-A real-time online debate platform with matchmaking, user accounts, and structured debate sessions. Built with Python WebSockets backend and vanilla JavaScript frontend.
+A real-time debate platform with WebSocket-based matchmaking, structured turn-based debates, and MMR (skill rating) system.
 
-## Features
+## 🎯 Features
 
-- **User Authentication**: Account creation and login with password hashing
-- **MMR-based Matchmaking**: Intelligent opponent matching based on skill level
-- **Real-time Debates**: WebSocket-powered live debate sessions
-- **Turn-based System**: Structured argumentation with time limits
-- **Debate Logging**: Complete session history and downloadable logs
-- **Minimal UI**: Clean, functional interface focused on content
+- **Real-time matchmaking** based on MMR (skill level)
+- **Structured debates** with preparation and turn timers
+- **WebSocket communication** for instant updates
+- **Turn-based arguments** (3 turns per player, 2 minutes each)
+- **Complete debate logging** with downloadable transcripts
+- **No judging system** - focus on discussion and skill building
+- **Responsive design** with clean, minimal interface
 
-## Technology Stack
+## 🏗️ Architecture
 
-### Backend
-- **Python** - Core application logic
-- **WebSockets** - Real-time communication
-- **SQLite** - Lightweight database storage
+### Backend (Python)
+- **WebSockets** for real-time communication
+- **SQLite database** for user accounts, debates, and topics
+- **MMR-based matchmaking** with time expansion algorithm
+- **Async debate session management**
 
 ### Frontend
 - **HTML** - Page structure
@@ -295,6 +297,13 @@ Server logs are displayed in the console. Enable debug mode in `app.py` for deta
 
 MIT License - see LICENSE file for details.
 
-## Support
+## 📞 Support
 
-For questions or issues, please create an issue in the repository or contact the development team.
+For issues or questions:
+- Open a GitHub issue
+- Check the WebSocket connection in browser console
+- Verify server is running on correct port
+
+---
+
+**Happy Debating! 🎯**
