@@ -22,13 +22,22 @@ except ImportError:
 
 class DebatePlatformServer:
     def __init__(self, host=None, port=None, debug=False):
-        # Use environment variables for deployment
-        self.host = host or os.getenv('HOST', '0.0.0.0')  # Render requires 0.0.0.0
-        self.port = int(port or os.getenv('PORT', 8765))
-        self.debug = debug or os.getenv('DEBUG', 'False').lower() == 'true'
-        self.host = host
-        self.port = port
-        self.debug = debug
+        # Use environment variables for deployment with proper defaults
+        self.host = host if host is not None else os.getenv('HOST', 'localhost')
+        
+        # Handle port configuration properly for Render
+        if port is not None:
+            self.port = int(port)
+        elif os.getenv('PORT'):
+            self.port = int(os.getenv('PORT'))
+        else:
+            self.port = 8765  # Default for local development
+            
+        # For production deployment, use 0.0.0.0 if PORT env var is set (indicates cloud deployment)
+        if os.getenv('PORT') and self.host == 'localhost':
+            self.host = '0.0.0.0'
+            
+        self.debug = debug if debug is not None else os.getenv('DEBUG', 'False').lower() == 'true'
         
         # Initialize components
         self.database = Database()
@@ -53,12 +62,14 @@ class DebatePlatformServer:
         try:
             frontend_path = Path(__file__).parent.parent / "frontend"
             if frontend_path.exists():
+                # Use a different port for static files, ensuring it's valid
+                static_port = self.port + 1000  # Use a much higher port to avoid conflicts
                 os.chdir(frontend_path)
                 handler = http.server.SimpleHTTPRequestHandler
-                self.http_server = socketserver.TCPServer(("", self.port + 1), handler)
+                self.http_server = socketserver.TCPServer(("", static_port), handler)
                 
                 def serve():
-                    print(f"✓ Static file server running on port {self.port + 1}")
+                    print(f"✓ Static file server running on port {static_port}")
                     self.http_server.serve_forever()
                 
                 static_thread = threading.Thread(target=serve, daemon=True)
@@ -70,10 +81,11 @@ class DebatePlatformServer:
         """Start the WebSocket server and all background services"""
         try:
             print("Starting Debate Platform Server...")
+            print(f"Host: {self.host}, Port: {self.port}")
             
-            # Start static file server (for production)
-            if not self.debug:
-                self.start_static_server()
+            # Skip static server for now - Render will handle static files differently
+            # if not self.debug:
+            #     self.start_static_server()
             
             # Start matchmaking service
             matchmaking_task = asyncio.create_task(
@@ -86,7 +98,8 @@ class DebatePlatformServer:
                     debate_id, user1_id, user2_id, topic
                 )
             
-            # Start WebSocket server
+            # Start WebSocket server with proper error handling
+            print(f"Starting WebSocket server on {self.host}:{self.port}")
             self.server = await websockets.serve(
                 self.websocket_handler.handle_connection,
                 self.host,
@@ -136,9 +149,7 @@ class DebatePlatformServer:
 async def main():
     """Main server entry point"""
     # Use environment variables for production deployment
-    server = DebatePlatformServer(
-        debug=os.getenv('DEBUG', 'False').lower() == 'true'
-    )
+    server = DebatePlatformServer()
     
     try:
         await server.start_server()
