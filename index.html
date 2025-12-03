@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debate Platform</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .start-button {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.2s;
+        }
+        .start-button:hover {
+            background-color: #2980b9;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            color: #155724;
+        }
+        .features {
+            text-align: left;
+            margin: 30px 0;
+        }
+        .features h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .features ul {
+            color: #7f8c8d;
+        }
+        .features li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Online Debate Platform</h1>
+        <p>
+            Welcome to the Online Debate Platform! Practice your argumentation skills 
+            in structured, real-time debates with opponents matched by skill level.
+        </p>
+        
+        <div class="features">
+            <h3>Features:</h3>
+            <ul>
+                <li>✅ Real-time matchmaking based on skill (MMR)</li>
+                <li>✅ Structured turn-based debates</li>
+                <li>✅ Random topic selection</li>
+                <li>✅ Complete argument logging</li>
+                <li>✅ No judges - focus on discussion</li>
+            </ul>
+        </div>
+        
+        <a href="frontend/login.html" class="start-button">Start Debating</a>
+        
+        <div class="status">
+            <strong>Server Status:</strong> <span id="serverStatus">Checking...</span>
+        </div>
+    </div>
+
+    <script>
+        // Check if server is running
+        function checkServerStatus() {
+            try {
+                // Automatically detect WebSocket URL
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                
+                let wsUrl;
+                if (isLocalhost) {
+                    wsUrl = `${protocol}//${window.location.hostname}:8765`;
+                } else {
+                    wsUrl = `${protocol}//${window.location.host}`;
+                }
+                
+                const ws = new WebSocket(wsUrl);
+                ws.onopen = () => {
+                    const statusText = isLocalhost ? '✅ Running on localhost:8765' : '✅ Server running';
+                    document.getElementById('serverStatus').textContent = statusText;
+                    document.getElementById('serverStatus').style.color = '#155724';
+                    ws.close();
+                };
+                ws.onerror = () => {
+                    document.getElementById('serverStatus').textContent = '❌ Not running (Start backend/app.py first)';
+                    document.getElementById('serverStatus').style.color = '#721c24';
+                };
+                setTimeout(() => {
+                    if (ws.readyState === WebSocket.CONNECTING) {
+                        document.getElementById('serverStatus').textContent = '❌ Server not responding';
+                        document.getElementById('serverStatus').style.color = '#721c24';
+                        ws.close();
+                    }
+                }, 3000);
+            } catch (error) {
+                document.getElementById('serverStatus').textContent = '❌ Connection failed';
+                document.getElementById('serverStatus').style.color = '#721c24';
+            }
+        }
+
+        // Check server status when page loads
+        window.addEventListener('load', checkServerStatus);
+    </script>
+</body>
+</html>

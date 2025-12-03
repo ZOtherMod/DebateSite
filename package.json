@@ -1,0 +1,29 @@
+{
+  "name": "debate-platform",
+  "version": "1.0.0",
+  "description": "Online debate platform with real-time matchmaking and WebSocket communication",
+  "main": "backend/app.py",
+  "scripts": {
+    "start": "cd backend && python app.py",
+    "dev": "cd backend && python app.py",
+    "install-python-deps": "pip install -r requirements.txt",
+    "setup": "npm run install-python-deps"
+  },
+  "keywords": [
+    "debate",
+    "websocket",
+    "realtime",
+    "matchmaking",
+    "python",
+    "sqlite"
+  ],
+  "author": "Debate Platform Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/debate-platform.git"
+  },
+  "engines": {
+    "python": ">=3.8"
+  }
+}
