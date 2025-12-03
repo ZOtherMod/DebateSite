@@ -17,11 +17,13 @@ function connectWebSocket() {
     
     let wsUrl;
     if (isLocalhost) {
-        // Local development
+        // Local development: HTTP on 8080, WebSocket on 8765
         wsUrl = `${protocol}//${window.location.hostname}:8765`;
     } else {
-        // Production deployment (Render, etc.)
-        wsUrl = `${protocol}//${window.location.host}`;
+        // Production deployment: For now, show a message that WebSocket is not available
+        console.warn('Production WebSocket not yet configured. Please use local development mode.');
+        showMessage('WebSocket connection not available in production mode yet. Please use local development.', 'error');
+        return;
     }
     
     try {
