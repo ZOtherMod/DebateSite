@@ -17,9 +17,12 @@ from debate_logic import DebateManager
 
 try:
     import websockets
+    from websockets import serve
     from websockets.exceptions import ConnectionClosed
-except ImportError:
-    print("Error: websockets library not installed. Please install it with: pip install websockets")
+    from websockets.http11 import Response
+except ImportError as e:
+    print(f"Error: websockets library not properly installed: {e}")
+    print("Please install it with: pip install websockets")
     exit(1)
 
 class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
@@ -124,6 +127,54 @@ class DebatePlatformServer:
             print(f"Could not start HTTP server: {e}")
             return None
     
+    async def process_request(self, path, request_headers):
+        """Handle HTTP requests that come to the WebSocket server"""
+        # If this is a WebSocket upgrade request, let WebSocket handle it
+        if "upgrade" in request_headers and request_headers["upgrade"].lower() == "websocket":
+            return None  # Let WebSocket server handle this
+            
+        # Handle HTTP requests for static files
+        try:
+            frontend_path = Path(__file__).parent.parent / "frontend"
+            
+            # Default to login.html if accessing root
+            if path == "/" or path == "":
+                file_path = frontend_path / "login.html"
+            else:
+                # Remove leading slash and construct file path
+                clean_path = path.lstrip("/")
+                file_path = frontend_path / clean_path
+            
+            # Security check - ensure file is within frontend directory
+            try:
+                file_path.resolve().relative_to(frontend_path.resolve())
+            except ValueError:
+                # Path is outside frontend directory
+                return Response(404, [], b"Not Found")
+            
+            if file_path.exists() and file_path.is_file():
+                # Determine content type
+                content_type = "text/html"
+                if file_path.suffix == ".css":
+                    content_type = "text/css"
+                elif file_path.suffix == ".js":
+                    content_type = "application/javascript"
+                elif file_path.suffix == ".json":
+                    content_type = "application/json"
+                
+                # Read and return file
+                with open(file_path, 'rb') as f:
+                    content = f.read()
+                
+                headers = [("Content-Type", content_type)]
+                return Response(200, headers, content)
+            else:
+                return Response(404, [], b"Not Found")
+                
+        except Exception as e:
+            print(f"Error serving file {path}: {e}")
+            return Response(500, [], b"Internal Server Error")
+
     async def start_server(self):
         """Start the server services"""
         try:
@@ -136,23 +187,30 @@ class DebatePlatformServer:
             )
             
             if os.getenv('PORT'):
-                # Production mode (Render): Start HTTP server on the main port
-                print("Production mode: HTTP server on main port for Render")
-                http_port = self.start_http_server()
+                # Production mode (Render): Use WebSocket server with HTTP support
+                print("Production mode: WebSocket server with HTTP support for Render")
                 
-                # Keep the asyncio event loop running for matchmaking
+                # Start WebSocket server that also handles HTTP requests
+                print(f"Starting combined server on {self.host}:{self.port}")
+                self.server = await websockets.serve(
+                    self.websocket_handler.handle_connection,
+                    self.host,
+                    self.port,
+                    process_request=self.process_request
+                )
+                
                 self.running = True
-                print(f"✓ Production server started on http://{self.host}:{self.port}")
+                print(f"✓ Combined HTTP/WebSocket server running on {self.host}:{self.port}")
+                print(f"✓ Frontend accessible at http://{self.host}:{self.port}")
+                print(f"✓ WebSocket accessible at ws://{self.host}:{self.port}")
                 print("✓ Matchmaking service running")
                 print("✓ Database initialized")
-                print("Note: WebSocket connections will need to be handled via proxy or alternative method")
                 
-                # Keep server alive
-                while self.running:
-                    await asyncio.sleep(1)
+                # Keep server running
+                await self.server.wait_closed()
                     
             else:
-                # Development mode: Both HTTP and WebSocket servers
+                # Development mode: Separate HTTP and WebSocket servers
                 print("Development mode: Separate HTTP and WebSocket servers")
                 
                 # Start HTTP server for frontend files
