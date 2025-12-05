@@ -187,9 +187,10 @@ class DebatePlatformServer:
             )
             
             if os.getenv('PORT'):
-                # Production mode (Render): Use WebSocket server with HTTP support
-                print("Production mode: WebSocket server with HTTP support for Render")
+                # Production mode (Render): Use only WebSocket server with HTTP support
+                print("Production mode: Single WebSocket server with HTTP support for Render")
                 
+                # DON'T start separate HTTP server in production
                 # Start WebSocket server that also handles HTTP requests
                 print(f"Starting combined server on {self.host}:{self.port}")
                 self.server = await websockets.serve(
