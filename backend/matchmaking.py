@@ -4,14 +4,13 @@ from typing import Dict, List, Optional, Tuple
 
 class MatchmakingQueue:
     def __init__(self):
-        self.queue: List[Tuple[int, int]] = []  # (user_id, mmr)
-        self.waiting_users: Dict[int, dict] = {}  # user_id -> user_info
-        self.match_expansion_time = 30  # seconds to expand MMR range
-        self.initial_mmr_range = 100  # initial MMR difference allowed
-        self.max_mmr_range = 500  # maximum MMR difference
+        self.queue: List[Tuple[int, int]] = []
+        self.waiting_users: Dict[int, dict] = {}
+        self.match_expansion_time = 30
+        self.initial_mmr_range = 100
+        self.max_mmr_range = 500
         
     def add_to_queue(self, user_id: int, mmr: int, user_info: dict):
-        """Add a user to the matchmaking queue"""
         if user_id not in [u[0] for u in self.queue]:
             self.queue.append((user_id, mmr))
             self.waiting_users[user_id] = {
@@ -21,20 +20,17 @@ class MatchmakingQueue:
             print(f"User {user_id} added to queue with MMR {mmr}")
     
     def remove_from_queue(self, user_id: int):
-        """Remove a user from the matchmaking queue"""
         self.queue = [(uid, mmr) for uid, mmr in self.queue if uid != user_id]
         if user_id in self.waiting_users:
             del self.waiting_users[user_id]
             print(f"User {user_id} removed from queue")
     
     def get_allowed_mmr_range(self, wait_time: float) -> int:
-        """Calculate allowed MMR range based on wait time"""
         expansions = int(wait_time // self.match_expansion_time)
         expanded_range = self.initial_mmr_range + (expansions * 50)
         return min(expanded_range, self.max_mmr_range)
     
     def find_match(self) -> Optional[Tuple[int, int]]:
-        """Find the best match in the queue using MMR-based algorithm"""
         if len(self.queue) < 2:
             return None
         
@@ -71,7 +67,6 @@ class MatchmakingQueue:
         return best_match
     
     def get_queue_status(self) -> dict:
-        """Get current queue status"""
         return {
             'queue_size': len(self.queue),
             'waiting_users': list(self.waiting_users.keys())
@@ -83,10 +78,9 @@ class Matchmaker:
         self.websocket_manager = websocket_manager
         self.database = database
         self.running = False
-        self.match_check_interval = 2  # seconds
+        self.match_check_interval = 2
         
     async def start_matchmaking_service(self):
-        """Start the matchmaking background service"""
         self.running = True
         print("Matchmaking service started")
         

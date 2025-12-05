@@ -1,4 +1,3 @@
-// Global application state
 let appState = {
     websocket: null,
     currentUser: null,
@@ -9,19 +8,14 @@ let appState = {
     isConnected: false
 };
 
-// WebSocket connection management
 function connectWebSocket() {
-    // Automatically detect WebSocket URL for both local and production
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     
     let wsUrl;
     if (isLocalhost) {
-        // Local development: HTTP on 8080, WebSocket on 8765
         wsUrl = `${protocol}//${window.location.hostname}:8765`;
     } else {
-        // Production deployment: Use same host and port as the web page
-        // Render supports WebSocket connections on the same port as HTTP
         wsUrl = `${protocol}//${window.location.host}`;
         console.log('Connecting to production WebSocket:', wsUrl);
     }
@@ -95,7 +89,7 @@ function handleWebSocketMessage(event) {
                 showMessage(data.message, 'error');
                 break;
             case 'pong':
-                // Handle ping response
+
                 break;
             default:
                 console.log('Unknown message type:', data.type);
@@ -110,7 +104,7 @@ function handleWebSocketClose() {
     appState.isConnected = false;
     updateConnectionStatus('Disconnected');
     
-    // Attempt to reconnect
+
     if (appState.reconnectAttempts < appState.maxReconnectAttempts) {
         appState.reconnectAttempts++;
         console.log(`Reconnect attempt ${appState.reconnectAttempts}/${appState.maxReconnectAttempts}`);
@@ -141,7 +135,7 @@ function sendWebSocketMessage(message) {
     }
 }
 
-// UI Helper Functions
+
 function updateConnectionStatus(text, isOnline = false) {
     const indicator = document.getElementById('connectionIndicator');
     const statusText = document.getElementById('connectionText');
@@ -161,7 +155,6 @@ function showMessage(message, type = 'info') {
         messageText.className = `message ${type}`;
         container.classList.remove('hidden');
         
-        // Auto-hide after 5 seconds
         setTimeout(() => {
             container.classList.add('hidden');
         }, 5000);
@@ -196,7 +189,7 @@ function setElementText(elementId, text) {
     }
 }
 
-// Authentication Functions
+
 function handleAuthResponse(data) {
     if (data.success) {
         appState.currentUser = {
@@ -205,12 +198,12 @@ function handleAuthResponse(data) {
             mmr: data.mmr
         };
         
-        // Store user data in localStorage
+
         localStorage.setItem('debateUser', JSON.stringify(appState.currentUser));
         
         showMessage('Login successful!', 'success');
         
-        // Redirect to matchmaking page
+
         setTimeout(() => {
             window.location.href = 'matchmaking.html';
         }, 1000);
@@ -223,7 +216,7 @@ function handleAccountCreationResponse(data) {
     if (data.success) {
         showMessage('Account created successfully! You can now login.', 'success');
         
-        // Switch to login form
+
         setTimeout(() => {
             showLoginForm();
         }, 1500);
@@ -232,11 +225,11 @@ function handleAccountCreationResponse(data) {
     }
 }
 
-// Login Page Functions
+
 function initializeLoginPage() {
     connectWebSocket();
     
-    // Form switching
+
     const showCreateAccountBtn = document.getElementById('showCreateAccount');
     const showLoginBtn = document.getElementById('showLogin');
     
@@ -254,7 +247,7 @@ function initializeLoginPage() {
         });
     }
     
-    // Form submissions
+
     const loginForm = document.getElementById('loginFormElement');
     const createAccountForm = document.getElementById('createAccountFormElement');
     
@@ -319,9 +312,9 @@ function handleCreateAccountSubmit(e) {
     });
 }
 
-// Matchmaking Page Functions
+
 function initializeMatchmakingPage() {
-    // Load user data from localStorage
+
     const userData = localStorage.getItem('debateUser');
     if (!userData) {
         window.location.href = 'login.html';
@@ -330,19 +323,19 @@ function initializeMatchmakingPage() {
     
     appState.currentUser = JSON.parse(userData);
     
-    // Update UI with user info
+
     setElementText('usernameDisplay', `Welcome, ${appState.currentUser.username}`);
     setElementText('mmrDisplay', `MMR: ${appState.currentUser.mmr}`);
     
     connectWebSocket();
     
-    // Logout functionality
+
     const logoutBtn = document.getElementById('logoutButton');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
     
-    // Matchmaking controls
+
     const startBtn = document.getElementById('startMatchmakingButton');
     const stopBtn = document.getElementById('stopMatchmakingButton');
     
@@ -354,7 +347,7 @@ function initializeMatchmakingPage() {
         stopBtn.addEventListener('click', stopMatchmaking);
     }
     
-    // Proceed to debate button
+
     const proceedBtn = document.getElementById('proceedToDebateButton');
     if (proceedBtn) {
         proceedBtn.addEventListener('click', proceedToDebate);
@@ -410,7 +403,7 @@ function handleMatchFound(data) {
         opponent: data.opponent
     };
     
-    // Store debate data
+
     localStorage.setItem('currentDebate', JSON.stringify(appState.currentDebate));
     
     hideElement('statusContainer');
@@ -427,9 +420,9 @@ function proceedToDebate() {
     window.location.href = 'debate.html';
 }
 
-// Debate Page Functions
+
 function initializeDebatePage() {
-    // Load user and debate data
+
     const userData = localStorage.getItem('debateUser');
     const debateData = localStorage.getItem('currentDebate');
     
@@ -441,7 +434,7 @@ function initializeDebatePage() {
     appState.currentUser = JSON.parse(userData);
     appState.currentDebate = JSON.parse(debateData);
     
-    // Update UI
+
     setElementText('usernameDisplay', appState.currentUser.username);
     setElementText('topicText', appState.currentDebate.topic);
     setElementText('opponentUsername', appState.currentDebate.opponent.username);
@@ -449,7 +442,7 @@ function initializeDebatePage() {
     
     connectWebSocket();
     
-    // Argument submission
+
     const submitBtn = document.getElementById('submitArgumentButton');
     const clearBtn = document.getElementById('clearArgumentButton');
     const argumentInput = document.getElementById('argumentInput');

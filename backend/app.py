@@ -26,49 +26,36 @@ except ImportError as e:
     exit(1)
 
 class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
-    """Custom HTTP handler to serve static files from frontend directory"""
-    
     def __init__(self, *args, frontend_path=None, **kwargs):
         self.frontend_path = frontend_path or Path(__file__).parent.parent / "frontend"
         super().__init__(*args, **kwargs)
     
     def translate_path(self, path):
-        """Translate a /-separated PATH to the local filename syntax."""
-        # Parse the URL to remove query parameters
         path = urllib.parse.urlparse(path).path
-        
-        # Remove leading slash
         path = path.lstrip('/')
         
-        # Default to index.html if no path specified
         if not path or path == '/':
-            path = 'login.html'  # Default to login page
+            path = 'login.html'
         
-        # Construct the full path
         full_path = self.frontend_path / path
-        
         return str(full_path)
 
 class DebatePlatformServer:
     def __init__(self, host=None, port=None, debug=False):
-        # Use environment variables for deployment with proper defaults
         self.host = host if host is not None else os.getenv('HOST', 'localhost')
         
-        # Handle port configuration properly for Render
         if port is not None:
             self.port = int(port)
         elif os.getenv('PORT'):
             self.port = int(os.getenv('PORT'))
         else:
-            self.port = 8765  # Default for local development
+            self.port = 8765
             
-        # For production deployment, use 0.0.0.0 if PORT env var is set (indicates cloud deployment)
         if os.getenv('PORT') and self.host == 'localhost':
             self.host = '0.0.0.0'
             
         self.debug = debug if debug is not None else os.getenv('DEBUG', 'False').lower() == 'true'
         
-        # Initialize components
         self.database = Database()
         self.websocket_manager = WebSocketManager()
         self.debate_manager = DebateManager(self.websocket_manager, self.database)
@@ -77,7 +64,6 @@ class DebatePlatformServer:
             self.websocket_manager, self.matchmaker, self.debate_manager, self.database
         )
         
-        # Server state
         self.running = False
         self.server = None
         self.http_server = None
@@ -87,25 +73,16 @@ class DebatePlatformServer:
         print(f"Debug mode: {'ON' if self.debug else 'OFF'}")
     
     def start_http_server(self):
-        """Start HTTP server for static files"""
         try:
             frontend_path = Path(__file__).parent.parent / "frontend"
             if frontend_path.exists():
-                # Determine HTTP port based on environment
-                if os.getenv('PORT'):
-                    # Production: Use the main port for HTTP
-                    http_port = self.port
-                else:
-                    # Local development: Use different port for HTTP server
-                    http_port = 8080
+                http_port = self.port if os.getenv('PORT') else 8080
                 
                 def handler_factory(*args, **kwargs):
                     return CustomHTTPRequestHandler(*args, frontend_path=frontend_path, **kwargs)
                 
-                # Use ThreadingTCPServer for better concurrency in production
                 if os.getenv('PORT'):
                     self.http_server = socketserver.ThreadingTCPServer((self.host, http_port), handler_factory)
-                    # Allow reuse of address for production
                     self.http_server.allow_reuse_address = True
                 else:
                     self.http_server = socketserver.TCPServer((self.host, http_port), handler_factory)
@@ -118,7 +95,6 @@ class DebatePlatformServer:
                     except Exception as e:
                         print(f"HTTP server error: {e}")
                 
-                # In production, don't use daemon threads
                 daemon = not bool(os.getenv('PORT'))
                 http_thread = threading.Thread(target=serve, daemon=daemon)
                 http_thread.start()
@@ -128,32 +104,24 @@ class DebatePlatformServer:
             return None
     
     async def process_request(self, path, request_headers):
-        """Handle HTTP requests that come to the WebSocket server"""
-        # If this is a WebSocket upgrade request, let WebSocket handle it
         if "upgrade" in request_headers and request_headers["upgrade"].lower() == "websocket":
-            return None  # Let WebSocket server handle this
+            return None
             
-        # Handle HTTP requests for static files
         try:
             frontend_path = Path(__file__).parent.parent / "frontend"
             
-            # Default to login.html if accessing root
             if path == "/" or path == "":
                 file_path = frontend_path / "login.html"
             else:
-                # Remove leading slash and construct file path
                 clean_path = path.lstrip("/")
                 file_path = frontend_path / clean_path
             
-            # Security check - ensure file is within frontend directory
             try:
                 file_path.resolve().relative_to(frontend_path.resolve())
             except ValueError:
-                # Path is outside frontend directory
                 return Response(404, [], b"Not Found")
             
             if file_path.exists() and file_path.is_file():
-                # Determine content type
                 content_type = "text/html"
                 if file_path.suffix == ".css":
                     content_type = "text/css"
@@ -162,7 +130,6 @@ class DebatePlatformServer:
                 elif file_path.suffix == ".json":
                     content_type = "application/json"
                 
-                # Read and return file
                 with open(file_path, 'rb') as f:
                     content = f.read()
                 
@@ -176,22 +143,17 @@ class DebatePlatformServer:
             return Response(500, [], b"Internal Server Error")
 
     async def start_server(self):
-        """Start the server services"""
         try:
             print("Starting Debate Platform Server...")
             print(f"Host: {self.host}, Port: {self.port}")
             
-            # Start matchmaking service
             matchmaking_task = asyncio.create_task(
                 self.matchmaker.start_matchmaking_service()
             )
             
             if os.getenv('PORT'):
-                # Production mode (Render): Use only WebSocket server with HTTP support
-                print("Production mode: Single WebSocket server with HTTP support for Render")
+                print("Production mode: Single WebSocket server with HTTP support")
                 
-                # DON'T start separate HTTP server in production
-                # Start WebSocket server that also handles HTTP requests
                 print(f"Starting combined server on {self.host}:{self.port}")
                 self.server = await websockets.serve(
                     self.websocket_handler.handle_connection,
@@ -207,17 +169,13 @@ class DebatePlatformServer:
                 print("✓ Matchmaking service running")
                 print("✓ Database initialized")
                 
-                # Keep server running
                 await self.server.wait_closed()
                     
             else:
-                # Development mode: Separate HTTP and WebSocket servers
                 print("Development mode: Separate HTTP and WebSocket servers")
                 
-                # Start HTTP server for frontend files
                 http_port = self.start_http_server()
                 
-                # Start WebSocket server
                 print(f"Starting WebSocket server on {self.host}:{self.port}")
                 self.server = await websockets.serve(
                     self.websocket_handler.handle_connection,
@@ -231,7 +189,6 @@ class DebatePlatformServer:
                 print("✓ Matchmaking service running")
                 print("✓ Database initialized")
                 
-                # Keep server running
                 await self.server.wait_closed()
             
         except Exception as e:
@@ -266,8 +223,6 @@ class DebatePlatformServer:
         }
 
 async def main():
-    """Main server entry point"""
-    # Use environment variables for production deployment
     server = DebatePlatformServer()
     
     try:
@@ -284,7 +239,6 @@ if __name__ == "__main__":
     print("Online Debate Platform Server")
     print("=" * 50)
     
-    # Check if database directory exists
     db_dir = Path("database")
     if not db_dir.exists():
         db_dir.mkdir(parents=True, exist_ok=True)
