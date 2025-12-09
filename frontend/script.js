@@ -16,7 +16,12 @@ function connectWebSocket() {
     if (isLocalhost) {
         wsUrl = `${protocol}//${window.location.hostname}:8765`;
     } else {
-        wsUrl = `${protocol}//${window.location.host}`;
+        // Production: You can either hardcode your Render URL or use environment variable
+        // For now, let's make it configurable
+        const WEBSOCKET_URL = window.location.hostname.includes('github.io') 
+            ? 'wss://your-render-app.onrender.com'  // Replace with actual Render URL
+            : `${protocol}//${window.location.host}`;
+        wsUrl = WEBSOCKET_URL;
         console.log('Connecting to production WebSocket:', wsUrl);
     }
     

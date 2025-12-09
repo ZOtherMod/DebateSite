@@ -156,7 +156,6 @@ class DebatePlatformServer:
                 http_port = self.start_http_server()
                 
                 # In production, we'll rely on the HTTP server
-                # and handle WebSocket connections differently
                 print(f"✓ Server started in production mode")
                 print(f"✓ Frontend accessible at http://{self.host}:{self.port}")
                 print("Note: WebSocket connections will be handled via HTTP upgrade")
