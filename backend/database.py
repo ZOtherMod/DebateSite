@@ -322,3 +322,35 @@ class Database:
             })
         
         return debates
+    
+    def get_debate_by_id(self, debate_id):
+        """Get debate information by ID"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            if self.use_postgres:
+                cursor.execute("SELECT id, user1_id, user2_id, topic, winner, timestamp FROM debates WHERE id = %s", (debate_id,))
+            else:
+                cursor.execute("SELECT id, user1_id, user2_id, topic, winner, timestamp FROM debates WHERE id = ?", (debate_id,))
+            
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result:
+                return {
+                    'id': result[0],
+                    'user1_id': result[1],
+                    'user2_id': result[2],
+                    'topic': result[3],
+                    'winner': result[4],
+                    'timestamp': result[5]
+                }
+            return None
+        except Exception as e:
+            try:
+                conn.close()
+            except:
+                pass
+            print(f"Error getting debate by ID: {e}")
+            return None

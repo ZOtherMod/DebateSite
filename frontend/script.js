@@ -59,6 +59,9 @@ function handleWebSocketMessage(event) {
             case 'match_found':
                 handleMatchFound(data);
                 break;
+            case 'start_debate_response':
+                handleStartDebateResponse(data);
+                break;
             case 'debate_started':
                 handleDebateStarted(data);
                 break;
@@ -441,6 +444,17 @@ function initializeDebatePage() {
     
     connectWebSocket();
     
+    // Start the debate session once connected
+    setTimeout(() => {
+        if (appState.ws && appState.ws.readyState === WebSocket.OPEN) {
+            sendMessage({
+                type: 'start_debate',
+                user_id: appState.currentUser.id,
+                debate_id: appState.currentDebate.id
+            });
+        }
+    }, 1000); // Wait 1 second for WebSocket to connect
+    
 
     const submitBtn = document.getElementById('submitArgumentButton');
     const clearBtn = document.getElementById('clearArgumentButton');
@@ -459,9 +473,33 @@ function initializeDebatePage() {
     }
 }
 
+function handleStartDebateResponse(data) {
+    if (data.success) {
+        console.log('Debate session started successfully');
+    } else {
+        showMessage(`Failed to start debate: ${data.error}`, 'error');
+    }
+}
+
 function handleDebateStarted(data) {
     setElementText('debatePhase', 'Preparation');
-    addSystemMessage('Debate started! Preparation time begins now.');
+    
+    // Store and display user's side
+    appState.currentDebate.yourSide = data.your_side;
+    appState.currentDebate.opponentSide = data.opponent_side;
+    
+    // Update side display if elements exist
+    const yourSideElement = document.getElementById('yourSide');
+    const opponentSideElement = document.getElementById('opponentSide');
+    
+    if (yourSideElement) {
+        setElementText('yourSide', data.your_side);
+    }
+    if (opponentSideElement) {
+        setElementText('opponentSide', data.opponent_side);
+    }
+    
+    addSystemMessage(`Debate started! You are arguing for the ${data.your_side}. Preparation time begins now.`);
 }
 
 function handlePrepTimer(data) {
@@ -491,8 +529,9 @@ function handleDebatePhaseStart(data) {
 }
 
 function handleYourTurn(data) {
-    setElementText('timerLabel', `Your Turn (${data.turn_number})`);
-    setElementText('turnStatus', "It's your turn! Submit your argument.");
+    const sideInfo = data.your_side ? ` (${data.your_side})` : '';
+    setElementText('timerLabel', `Your Turn (${data.turn_number})${sideInfo}`);
+    setElementText('turnStatus', `It's your turn! Present your ${data.your_side || 'argument'}.`);
     
     showElement('argumentInputContainer');
     hideElement('waitingMessage');
@@ -504,8 +543,9 @@ function handleYourTurn(data) {
 }
 
 function handleOpponentTurn(data) {
-    setElementText('timerLabel', `Opponent's Turn (${data.turn_number})`);
-    setElementText('turnStatus', "Waiting for opponent's argument...");
+    const opponentSideInfo = data.opponent_side ? ` (${data.opponent_side})` : '';
+    setElementText('timerLabel', `Opponent's Turn (${data.turn_number})${opponentSideInfo}`);
+    setElementText('turnStatus', `Waiting for opponent's ${data.opponent_side || 'argument'}...`);
     
     hideElement('argumentInputContainer');
     showElement('waitingMessage');

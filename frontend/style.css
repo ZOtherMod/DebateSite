@@ -390,6 +390,44 @@ textarea:focus {
     color: #7f8c8d;
 }
 
+.sides-section {
+    background-color: #fff3cd;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid #ffeaa7;
+}
+
+.sides-section h3 {
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.sides-info {
+    display: flex;
+    justify-content: space-around;
+    gap: 2rem;
+}
+
+.side-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.side-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.side-value {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
 .debate-log-section {
     margin-bottom: 2rem;
 }

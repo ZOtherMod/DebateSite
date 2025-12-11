@@ -156,6 +156,9 @@ class WebSocketHandler:
         elif message_type == 'debate_message':
             return await self.handle_debate_message(data)
         
+        elif message_type == 'start_debate':
+            return await self.handle_start_debate(data)
+        
         elif message_type == 'ping':
             return {'type': 'pong', 'timestamp': data.get('timestamp')}
         
@@ -315,3 +318,64 @@ class WebSocketHandler:
             'success': True,
             'message': 'Message submitted'
         }
+    
+    async def handle_start_debate(self, data: dict) -> dict:
+        """Handle request to start a debate session"""
+        user_id = data.get('user_id')
+        debate_id = data.get('debate_id')
+        
+        if not user_id or not debate_id:
+            return {
+                'type': 'start_debate_response',
+                'success': False,
+                'error': 'User ID and Debate ID are required'
+            }
+        
+        # Check if debate exists in database
+        debate_info = self.database.get_debate_by_id(debate_id)
+        if not debate_info:
+            return {
+                'type': 'start_debate_response',
+                'success': False,
+                'error': 'Debate not found'
+            }
+        
+        # Check if user is part of this debate
+        if user_id != debate_info['user1_id'] and user_id != debate_info['user2_id']:
+            return {
+                'type': 'start_debate_response',
+                'success': False,
+                'error': 'You are not a participant in this debate'
+            }
+        
+        # Check if debate session already exists
+        existing_session = self.debate_manager.active_debates.get(debate_id)
+        if existing_session:
+            return {
+                'type': 'start_debate_response',
+                'success': True,
+                'message': 'Debate session already active'
+            }
+        
+        # Create the debate session
+        try:
+            await self.debate_manager.create_debate_session(
+                debate_id,
+                debate_info['user1_id'],
+                debate_info['user2_id'],
+                debate_info['topic']
+            )
+            
+            return {
+                'type': 'start_debate_response',
+                'success': True,
+                'message': 'Debate session started'
+            }
+            
+        except Exception as e:
+            print(f"Error starting debate session: {e}")
+            return {
+                'type': 'start_debate_response',
+                'success': False,
+                'error': 'Failed to start debate session'
+            }

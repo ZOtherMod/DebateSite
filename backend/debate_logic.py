@@ -12,6 +12,10 @@ class DebateSession:
         self.websocket_manager = websocket_manager
         self.database = database
         
+        # Side assignment - user1 gets Proposition, user2 gets Negation
+        self.user1_side = 'Proposition'
+        self.user2_side = 'Negation'
+        
         # Debate flow control
         self.phase = 'preparation'  # preparation, debate, ended
         self.current_turn = user1_id  # Who's turn it is
@@ -35,12 +39,23 @@ class DebateSession:
         """Start the debate session"""
         print(f"Starting debate {self.debate_id}: {self.topic}")
         
-        # Send initial topic and preparation timer
-        await self.send_to_both_users({
+        # Send initial topic and preparation timer with side assignments
+        await self.websocket_manager.send_to_user(self.user1_id, {
             'type': 'debate_started',
             'debate_id': self.debate_id,
             'topic': self.topic,
-            'prep_time_minutes': self.prep_time_minutes
+            'prep_time_minutes': self.prep_time_minutes,
+            'your_side': self.user1_side,
+            'opponent_side': self.user2_side
+        })
+        
+        await self.websocket_manager.send_to_user(self.user2_id, {
+            'type': 'debate_started',
+            'debate_id': self.debate_id,
+            'topic': self.topic,
+            'prep_time_minutes': self.prep_time_minutes,
+            'your_side': self.user2_side,
+            'opponent_side': self.user1_side
         })
         
         # Start preparation phase
@@ -114,17 +129,24 @@ class DebateSession:
             self.current_turn = self.user2_id
             other_user = self.user1_id
         
+        # Get current user's side
+        current_user_side = self.user1_side if self.current_turn == self.user1_id else self.user2_side
+        other_user_side = self.user2_side if self.current_turn == self.user1_id else self.user1_side
+        
         # Notify users about the turn
         await self.websocket_manager.send_to_user(self.current_turn, {
             'type': 'your_turn',
             'turn_number': (self.turn_count // 2) + 1,
-            'time_limit_minutes': self.turn_time_minutes
+            'time_limit_minutes': self.turn_time_minutes,
+            'your_side': current_user_side
         })
         
         await self.websocket_manager.send_to_user(other_user, {
             'type': 'opponent_turn',
             'turn_number': (self.turn_count // 2) + 1,
-            'time_limit_minutes': self.turn_time_minutes
+            'time_limit_minutes': self.turn_time_minutes,
+            'opponent_side': current_user_side,
+            'your_side': other_user_side
         })
         
         # Start turn timer
@@ -143,11 +165,14 @@ class DebateSession:
             minutes = remaining // 60
             seconds = remaining % 60
             
+            current_user_side = self.user1_side if self.current_turn == self.user1_id else self.user2_side
+            
             await self.send_to_both_users({
                 'type': 'turn_timer',
                 'remaining_seconds': remaining,
                 'display': f"{minutes:02d}:{seconds:02d}",
-                'current_turn_user': self.current_turn
+                'current_turn_user': self.current_turn,
+                'current_turn_side': current_user_side
             })
             
             if remaining == 0:
