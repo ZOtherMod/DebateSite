@@ -1,0 +1,213 @@
+.container {
+    min-height: calc(100vh - 200px);
+    background: linear-gradient(135deg, #fafafa, #ffefef);
+}
+
+.main {
+    padding: 40px;
+}
+
+.endContainer {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.loading {
+    text-align: center;
+    padding: 100px;
+    font-size: 20px;
+    color: #666;
+}
+
+.endHeader {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 40px;
+    background-color: #d4edda;
+    border-radius: 16px;
+    border: 2px solid #27ae60;
+}
+
+.endHeader h2 {
+    color: #27ae60;
+    margin-bottom: 15px;
+    font-size: 32px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.endMessage {
+    color: #2c3e50;
+    font-size: 18px;
+    margin: 0;
+}
+
+.topicSection {
+    background-color: white;
+    padding: 30px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.topicSection h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    font-family: 'Poppins', sans-serif;
+}
+
+.topicText {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1.4;
+    font-style: italic;
+}
+
+.finalLogSection {
+    margin-bottom: 30px;
+}
+
+.finalLogSection h3 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-family: 'Poppins', sans-serif;
+}
+
+.finalDebateLog {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.logMessage {
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 12px;
+    word-wrap: break-word;
+}
+
+.logMessage.system {
+    background-color: #f8f9fa;
+    border-left: 4px solid #95a5a6;
+}
+
+.logMessage.user {
+    background-color: #e8f4fd;
+    border-left: 4px solid #3498db;
+}
+
+.messageHeader {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.messageTimestamp {
+    font-size: 12px;
+    color: #666;
+    font-weight: normal;
+}
+
+.messageContent {
+    line-height: 1.5;
+    color: #333;
+}
+
+.endActions {
+    text-align: center;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.primaryButton {
+    background-color: #b74b4b;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.primaryButton:hover {
+    background-color: #a04242;
+    transform: translateY(-1px);
+}
+
+.secondaryButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.secondaryButton:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.feedbackSection {
+    background-color: #f0f8ff;
+    padding: 30px;
+    border-radius: 16px;
+    border: 2px solid #3498db;
+    text-align: center;
+}
+
+.feedbackSection h3 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-family: 'Poppins', sans-serif;
+}
+
+.feedbackText {
+    margin-bottom: 15px;
+    line-height: 1.6;
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+.feedbackNote {
+    color: #666;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding: 20px;
+    }
+    
+    .endHeader,
+    .topicSection,
+    .feedbackSection {
+        padding: 20px;
+    }
+    
+    .endActions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .endActions button {
+        width: 200px;
+    }
+}

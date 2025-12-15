@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DebateHub - Live Debate</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div id="root">
+        <!-- Header Component -->
+        <header class="header-container">
+            <div class="left-header">
+                <a href="index.html" class="logo-link">DebateHub</a>
+            </div>
+
+            <div class="mid-header">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="start.html">Start</a>
+                <a class="nav-link" href="about.html">About</a>
+                <a class="admin-link hidden" href="admin.html">Admin</a>
+            </div>
+
+            <div class="right-header">
+                <div class="profile-wrapper" id="profileWrapper">
+                    <img src="assets/defaultPhoto.svg" class="login-photo" id="profilePhoto" />
+                    <div class="login-container hidden" id="loginContainer">
+                        <div class="user-info">
+                            <span id="usernameDisplay">Welcome, User</span>
+                            <span id="mmrDisplay">MMR: 1000</span>
+                            <button id="logoutButton" class="sign-out">Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Debate Content -->
+        <main class="debate-page">
+            <!-- Debate Header -->
+            <div class="debate-header">
+                <div class="debate-topic" id="debateTopic">
+                    Loading debate topic...
+                </div>
+                <div class="debate-timer" id="debateTimer">
+                    <span class="timer-label">Time Remaining:</span>
+                    <span class="timer-value" id="timerValue">3:00</span>
+                </div>
+                <div class="debate-phase" id="debatePhase">
+                    Preparation Phase
+                </div>
+            </div>
+
+            <!-- Player Info -->
+            <div class="players-container">
+                <div class="player-card player-1" id="playerCard1">
+                    <div class="player-info">
+                        <h3 id="player1Name">Player 1</h3>
+                        <span class="player-side" id="player1Side">Proposition</span>
+                        <span class="player-mmr" id="player1MMR">MMR: 1000</span>
+                    </div>
+                    <div class="turn-indicator" id="turn1">
+                        <span class="turn-text">Your Turn</span>
+                    </div>
+                </div>
+
+                <div class="vs-divider">VS</div>
+
+                <div class="player-card player-2" id="playerCard2">
+                    <div class="player-info">
+                        <h3 id="player2Name">Player 2</h3>
+                        <span class="player-side" id="player2Side">Negation</span>
+                        <span class="player-mmr" id="player2MMR">MMR: 1000</span>
+                    </div>
+                    <div class="turn-indicator" id="turn2">
+                        <span class="turn-text">Waiting</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debate Messages -->
+            <div class="debate-messages-container">
+                <h3>Debate Arguments</h3>
+                <div class="messages-list" id="messagesList">
+                    <!-- Messages will be populated here -->
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area" id="inputArea">
+                <div class="input-container">
+                    <textarea 
+                        id="argumentInput" 
+                        placeholder="Type your argument here..." 
+                        rows="4"
+                        maxlength="1000"
+                    ></textarea>
+                    <div class="input-actions">
+                        <div class="character-count">
+                            <span id="charCount">0</span>/1000
+                        </div>
+                        <button id="submitButton" class="primary-button" disabled>
+                            Submit Argument
+                        </button>
+                    </div>
+                </div>
+                <div class="waiting-message hidden" id="waitingMessage">
+                    <p>Waiting for your opponent's argument...</p>
+                </div>
+            </div>
+
+            <!-- Debate Controls -->
+            <div class="debate-controls">
+                <button id="forfeitButton" class="danger-button">
+                    Forfeit Debate
+                </button>
+                <div class="debate-status" id="debateStatus">
+                    <span class="status-indicator online" id="connectionIndicator">●</span>
+                    <span id="statusText">Connected</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Forfeit Confirmation Modal -->
+        <div class="modal-overlay hidden" id="forfeitModal">
+            <div class="modal-content">
+                <h3>Forfeit Debate</h3>
+                <p>Are you sure you want to forfeit this debate? This will count as a loss and affect your MMR.</p>
+                <div class="modal-actions">
+                    <button id="confirmForfeit" class="danger-button">Yes, Forfeit</button>
+                    <button id="cancelForfeit" class="secondary-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Component -->
+        <footer class="sitefooter">
+            <p>© 2025 DebateHub | 
+                <a href="https://github.com/debatesit">GitHub</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="websocket.js"></script>
+    <script src="debate.js"></script>
+</body>
+</html>

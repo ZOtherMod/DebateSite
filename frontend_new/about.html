@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DebateHub - About</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div id="root">
+        <!-- Header Component -->
+        <header class="header-container">
+            <div class="left-header">
+                <a href="index.html" class="logo-link">DebateHub</a>
+            </div>
+
+            <div class="mid-header">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="start.html">Start</a>
+                <a class="nav-link active" href="about.html">About</a>
+                <a class="admin-link hidden" href="admin.html">Admin</a>
+            </div>
+
+            <div class="right-header">
+                <div class="profile-wrapper" id="profileWrapper">
+                    <img src="assets/defaultPhoto.svg" class="login-photo" id="profilePhoto" />
+                    <div class="login-container hidden" id="loginContainer">
+                        <div class="user-info">
+                            <span id="usernameDisplay">Welcome, User</span>
+                            <span id="mmrDisplay">MMR: 1000</span>
+                            <button id="logoutButton" class="sign-out">Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main About Content -->
+        <main class="about-page">
+            <!-- Hero Section -->
+            <section class="about-hero">
+                <div class="hero-container">
+                    <h1>About DebateHub</h1>
+                    <p class="hero-subtitle">
+                        The premier platform for competitive online debating, where minds meet to engage in structured, meaningful discourse.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Mission Section -->
+            <section class="mission-section">
+                <div class="content-container">
+                    <h2>Our Mission</h2>
+                    <p>
+                        DebateHub was created to foster critical thinking, improve communication skills, and bring people together through the art of debate. We believe that healthy discourse is essential for personal growth and societal progress.
+                    </p>
+                    <p>
+                        Our platform provides a structured environment where debaters of all skill levels can engage in meaningful conversations, learn from each other, and develop their argumentation abilities.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section">
+                <div class="content-container">
+                    <h2>Platform Features</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🎯</div>
+                            <h3>Smart Matchmaking</h3>
+                            <p>Our MMR-based system pairs you with opponents of similar skill level for balanced and competitive debates.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">⏱️</div>
+                            <h3>Structured Format</h3>
+                            <p>Turn-based debates with time limits ensure fair participation and keep discussions focused and engaging.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <h3>Performance Tracking</h3>
+                            <p>Track your progress with detailed statistics, MMR rankings, and debate history to see your improvement over time.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🌍</div>
+                            <h3>Diverse Topics</h3>
+                            <p>Engage with a wide range of debate topics covering politics, philosophy, science, culture, and current events.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🤝</div>
+                            <h3>Community Focused</h3>
+                            <p>Join a respectful community of debaters committed to learning, growing, and engaging in good faith discussions.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🎓</div>
+                            <h3>Skill Development</h3>
+                            <p>Improve your critical thinking, research abilities, and communication skills through regular practice and feedback.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section class="how-it-works-section">
+                <div class="content-container">
+                    <h2>How DebateHub Works</h2>
+                    <div class="steps-container">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Create Your Account</h3>
+                                <p>Sign up and create your profile to start your debating journey. Every new user begins with a base MMR rating.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Join the Queue</h3>
+                                <p>Enter the matchmaking system and get paired with an opponent of similar skill level. The system ensures balanced matches.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Engage in Debate</h3>
+                                <p>Take turns presenting arguments within time limits. One person argues for the proposition, the other for the opposition.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Grow Your Skills</h3>
+                                <p>Win or lose, you'll gain MMR based on performance. Review your debates and learn from each experience.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ranking System Section -->
+            <section class="ranking-section">
+                <div class="content-container">
+                    <h2>Ranking System</h2>
+                    <p>DebateHub uses an MMR (Matchmaking Rating) system to track your progress and ensure fair matches:</p>
+                    
+                    <div class="ranks-grid">
+                        <div class="rank-item">
+                            <div class="rank-icon beginner">🌱</div>
+                            <div class="rank-info">
+                                <h4>Beginner</h4>
+                                <span class="rank-range">0 - 799 MMR</span>
+                            </div>
+                        </div>
+                        
+                        <div class="rank-item">
+                            <div class="rank-icon novice">📚</div>
+                            <div class="rank-info">
+                                <h4>Novice</h4>
+                                <span class="rank-range">800 - 999 MMR</span>
+                            </div>
+                        </div>
+                        
+                        <div class="rank-item">
+                            <div class="rank-icon intermediate">⚡</div>
+                            <div class="rank-info">
+                                <h4>Intermediate</h4>
+                                <span class="rank-range">1000 - 1199 MMR</span>
+                            </div>
+                        </div>
+                        
+                        <div class="rank-item">
+                            <div class="rank-icon advanced">🔥</div>
+                            <div class="rank-info">
+                                <h4>Advanced</h4>
+                                <span class="rank-range">1200 - 1499 MMR</span>
+                            </div>
+                        </div>
+                        
+                        <div class="rank-item">
+                            <div class="rank-icon expert">💎</div>
+                            <div class="rank-info">
+                                <h4>Expert</h4>
+                                <span class="rank-range">1500 - 1999 MMR</span>
+                            </div>
+                        </div>
+                        
+                        <div class="rank-item">
+                            <div class="rank-icon master">👑</div>
+                            <div class="rank-info">
+                                <h4>Master</h4>
+                                <span class="rank-range">2000+ MMR</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Community Guidelines Section -->
+            <section class="guidelines-section">
+                <div class="content-container">
+                    <h2>Community Guidelines</h2>
+                    <p>DebateHub is committed to maintaining a respectful and constructive environment:</p>
+                    
+                    <div class="guidelines-list">
+                        <div class="guideline-item">
+                            <div class="guideline-icon">✅</div>
+                            <div class="guideline-text">
+                                <strong>Respect:</strong> Treat all participants with courtesy and dignity, regardless of their views.
+                            </div>
+                        </div>
+                        
+                        <div class="guideline-item">
+                            <div class="guideline-icon">✅</div>
+                            <div class="guideline-text">
+                                <strong>Good Faith:</strong> Engage sincerely and avoid trolling, bad faith arguments, or personal attacks.
+                            </div>
+                        </div>
+                        
+                        <div class="guideline-item">
+                            <div class="guideline-icon">✅</div>
+                            <div class="guideline-text">
+                                <strong>Evidence-Based:</strong> Support your arguments with facts, logic, and credible sources when possible.
+                            </div>
+                        </div>
+                        
+                        <div class="guideline-item">
+                            <div class="guideline-icon">✅</div>
+                            <div class="guideline-text">
+                                <strong>Stay on Topic:</strong> Keep discussions focused on the assigned debate topic and avoid tangential arguments.
+                            </div>
+                        </div>
+                        
+                        <div class="guideline-item">
+                            <div class="guideline-icon">❌</div>
+                            <div class="guideline-text">
+                                <strong>No Harassment:</strong> Personal attacks, hate speech, or harassment will not be tolerated.
+                            </div>
+                        </div>
+                        
+                        <div class="guideline-item">
+                            <div class="guideline-icon">❌</div>
+                            <div class="guideline-text">
+                                <strong>No Spam:</strong> Avoid repetitive arguments, copy-pasting, or other disruptive behavior.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Get Started Section -->
+            <section class="get-started-section">
+                <div class="content-container">
+                    <h2>Ready to Start Debating?</h2>
+                    <p>Join our community of passionate debaters and start improving your skills today.</p>
+                    
+                    <div class="cta-buttons">
+                        <a href="start.html" class="primary-button">Start Debating</a>
+                        <a href="login.html" class="secondary-button">Create Account</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer Component -->
+        <footer class="sitefooter">
+            <p>© 2025 DebateHub | 
+                <a href="https://github.com/debatesit">GitHub</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="websocket.js"></script>
+    <script src="about.js"></script>
+</body>
+</html>

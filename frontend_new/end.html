@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DebateHub - Debate Results</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div id="root">
+        <!-- Header Component -->
+        <header class="header-container">
+            <div class="left-header">
+                <a href="index.html" class="logo-link">DebateHub</a>
+            </div>
+
+            <div class="mid-header">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="start.html">Start</a>
+                <a class="nav-link" href="about.html">About</a>
+                <a class="admin-link hidden" href="admin.html">Admin</a>
+            </div>
+
+            <div class="right-header">
+                <div class="profile-wrapper" id="profileWrapper">
+                    <img src="assets/defaultPhoto.svg" class="login-photo" id="profilePhoto" />
+                    <div class="login-container hidden" id="loginContainer">
+                        <div class="user-info">
+                            <span id="usernameDisplay">Welcome, User</span>
+                            <span id="mmrDisplay">MMR: 1000</span>
+                            <button id="logoutButton" class="sign-out">Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Results Content -->
+        <main class="results-page">
+            <div class="results-container">
+                <!-- Result Header -->
+                <div class="result-header">
+                    <div class="result-status" id="resultStatus">
+                        <h1 class="result-title" id="resultTitle">Debate Complete!</h1>
+                        <div class="result-badge" id="resultBadge">
+                            <span id="resultText">Victory!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Debate Summary -->
+                <div class="debate-summary">
+                    <h2>Debate Summary</h2>
+                    <div class="summary-info">
+                        <div class="summary-item">
+                            <label>Topic:</label>
+                            <span id="debateTopic">Loading...</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Duration:</label>
+                            <span id="debateDuration">Loading...</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Total Arguments:</label>
+                            <span id="totalArguments">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player Results -->
+                <div class="players-results">
+                    <h2>Results</h2>
+                    <div class="players-grid">
+                        <!-- Winner Section -->
+                        <div class="player-result winner" id="winnerCard">
+                            <div class="result-crown">👑</div>
+                            <h3 id="winnerName">Winner</h3>
+                            <div class="player-details">
+                                <span class="player-side" id="winnerSide">Proposition</span>
+                                <span class="mmr-change positive" id="winnerMMRChange">+25 MMR</span>
+                                <span class="new-mmr" id="winnerNewMMR">New MMR: 1025</span>
+                            </div>
+                        </div>
+
+                        <!-- Loser Section -->
+                        <div class="player-result loser" id="loserCard">
+                            <h3 id="loserName">Opponent</h3>
+                            <div class="player-details">
+                                <span class="player-side" id="loserSide">Negation</span>
+                                <span class="mmr-change negative" id="loserMMRChange">-20 MMR</span>
+                                <span class="new-mmr" id="loserNewMMR">New MMR: 980</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Your Performance -->
+                <div class="performance-section" id="performanceSection">
+                    <h2>Your Performance</h2>
+                    <div class="performance-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="yourArguments">0</span>
+                            <span class="stat-label">Arguments Made</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="mmrChange">+0</span>
+                            <span class="stat-label">MMR Change</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="newMMR">1000</span>
+                            <span class="stat-label">New MMR</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="debateRank">Novice</span>
+                            <span class="stat-label">Rank</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="result-actions">
+                    <button id="playAgainButton" class="primary-button">
+                        Play Again
+                    </button>
+                    <button id="viewProfileButton" class="secondary-button">
+                        View Profile
+                    </button>
+                    <button id="shareResultButton" class="secondary-button">
+                        Share Result
+                    </button>
+                </div>
+
+                <!-- Detailed Arguments (Collapsible) -->
+                <div class="arguments-section">
+                    <button class="collapsible-header" id="argumentsToggle">
+                        <h3>View Debate Arguments</h3>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <div class="collapsible-content hidden" id="argumentsContent">
+                        <div class="arguments-list" id="argumentsList">
+                            <!-- Arguments will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Share Modal -->
+        <div class="modal-overlay hidden" id="shareModal">
+            <div class="modal-content">
+                <h3>Share Your Result</h3>
+                <div class="share-options">
+                    <button class="share-option" id="copyLinkButton">
+                        <span>📋</span>
+                        Copy Link
+                    </button>
+                    <button class="share-option" id="shareTwitterButton">
+                        <span>🐦</span>
+                        Share on Twitter
+                    </button>
+                    <button class="share-option" id="shareRedditButton">
+                        <span>📰</span>
+                        Share on Reddit
+                    </button>
+                </div>
+                <button id="closeShareModal" class="secondary-button">Close</button>
+            </div>
+        </div>
+
+        <!-- Footer Component -->
+        <footer class="sitefooter">
+            <p>© 2025 DebateHub | 
+                <a href="https://github.com/debatesit">GitHub</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="websocket.js"></script>
+    <script src="end.js"></script>
+</body>
+</html>
