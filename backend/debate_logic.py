@@ -79,7 +79,7 @@ class DebateSession:
     
     async def preparation_countdown(self):
         """Handle preparation phase countdown"""
-        prep_duration = self.prep_time_minutes * 60  # Convert to seconds
+        prep_duration = int(self.prep_time_minutes * 60)  # Convert to seconds and ensure integer
         
         for remaining in range(prep_duration, -1, -1):
             if self.phase != 'preparation':
@@ -156,7 +156,7 @@ class DebateSession:
     
     async def turn_countdown(self):
         """Handle turn countdown timer"""
-        turn_duration = self.turn_time_minutes * 60  # Convert to seconds
+        turn_duration = int(self.turn_time_minutes * 60)  # Convert to seconds and ensure integer
         
         for remaining in range(turn_duration, -1, -1):
             if self.phase != 'debate':
