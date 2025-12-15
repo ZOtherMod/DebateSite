@@ -188,7 +188,8 @@ class WebSocketHandler:
                 'success': True,
                 'user_id': result['id'],
                 'mmr': result['mmr'],
-                'username': result['username']
+                'username': result['username'],
+                'user_class': result['user_class']
             }
         else:
             return {

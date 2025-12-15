@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test UserClass Functionality</title>
+</head>
+<body>
+    <h1>UserClass Test</h1>
+    
+    <div>
+        <h2>Test Account Login</h2>
+        <button id="testLogin">Login as test (UserClass 2)</button>
+        <div id="testResult"></div>
+    </div>
+    
+    <div>
+        <h2>Regular Account Creation</h2>
+        <button id="createRegular">Create regular account</button>
+        <div id="regularResult"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:8765');
+            
+            ws.onopen = function() {
+                console.log('Connected to WebSocket');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                console.log('Received:', data);
+                
+                if (data.type === 'auth_response') {
+                    if (data.success) {
+                        document.getElementById('testResult').innerHTML = 
+                            `<strong>Success!</strong><br>
+                            User ID: ${data.user_id}<br>
+                            Username: ${data.username}<br>
+                            MMR: ${data.mmr}<br>
+                            UserClass: ${data.user_class}`;
+                    } else {
+                        document.getElementById('testResult').innerHTML = 
+                            `<strong>Failed:</strong> ${data.error}`;
+                    }
+                }
+                
+                if (data.type === 'account_creation_response') {
+                    if (data.success) {
+                        document.getElementById('regularResult').innerHTML = 
+                            `<strong>Account Created!</strong><br>
+                            User ID: ${data.user_id}<br>
+                            Message: ${data.message}`;
+                    } else {
+                        document.getElementById('regularResult').innerHTML = 
+                            `<strong>Failed:</strong> ${data.error}`;
+                    }
+                }
+            };
+        }
+        
+        document.getElementById('testLogin').onclick = function() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'authenticate',
+                    username: 'test',
+                    password: 'passpass'
+                }));
+            }
+        };
+        
+        document.getElementById('createRegular').onclick = function() {
+            const username = 'user' + Math.random().toString(36).substring(7);
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'create_account',
+                    username: username,
+                    password: 'password123'
+                }));
+            }
+        };
+        
+        // Connect when page loads
+        window.onload = connectWebSocket;
+    </script>
+</body>
+</html>

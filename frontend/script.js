@@ -197,7 +197,8 @@ function handleAuthResponse(data) {
         appState.currentUser = {
             id: data.user_id,
             username: data.username,
-            mmr: data.mmr
+            mmr: data.mmr,
+            user_class: data.user_class || 0
         };
         
 

@@ -28,7 +28,8 @@ class Database:
         if self.use_postgres:
             return psycopg2.connect(self.database_url, cursor_factory=RealDictCursor)
         else:
-            os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+            if self.db_path != ':memory:':
+                os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
             return sqlite3.connect(self.db_path)
     
     def init_database(self):
@@ -48,7 +49,8 @@ class Database:
                     id SERIAL PRIMARY KEY,
                     username VARCHAR(255) UNIQUE NOT NULL,
                     password_hash VARCHAR(255) NOT NULL,
-                    mmr INTEGER DEFAULT 1000
+                    mmr INTEGER DEFAULT 1000,
+                    user_class INTEGER DEFAULT 0
                 )
             ''')
             
@@ -79,7 +81,8 @@ class Database:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT UNIQUE NOT NULL,
                     password_hash TEXT NOT NULL,
-                    mmr INTEGER DEFAULT 1000
+                    mmr INTEGER DEFAULT 1000,
+                    user_class INTEGER DEFAULT 0
                 )
             ''')
             
@@ -118,6 +121,10 @@ class Database:
             self.insert_default_topics(cursor)
             conn.commit()
         
+        # Check if test account exists, create if it doesn't
+        self.create_test_account_if_not_exists(cursor)
+        conn.commit()
+        
         conn.close()
     
     def insert_default_topics(self, cursor):
@@ -140,19 +147,39 @@ class Database:
             else:
                 cursor.execute("INSERT INTO topics (topic_text) VALUES (?)", (topic,))
     
-    def create_user(self, username, password):
+    def create_test_account_if_not_exists(self, cursor):
+        """Create the test account with UserClass 2 if it doesn't exist"""
+        # Check if test account already exists
+        if self.use_postgres:
+            cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", ('test',))
+        else:
+            cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", ('test',))
+        
+        count = cursor.fetchone()[0]
+        
+        if count == 0:
+            # Create test account with password "passpass" and UserClass 2
+            password_hash = hashlib.sha256('passpass'.encode()).hexdigest()
+            if self.use_postgres:
+                cursor.execute("INSERT INTO users (username, password_hash, user_class, mmr) VALUES (%s, %s, %s, %s)", 
+                             ('test', password_hash, 2, 1500))
+            else:
+                cursor.execute("INSERT INTO users (username, password_hash, user_class, mmr) VALUES (?, ?, ?, ?)", 
+                             ('test', password_hash, 2, 1500))
+    
+    def create_user(self, username, password, user_class=0):
         try:
             password_hash = hashlib.sha256(password.encode()).hexdigest()
             conn = self.get_connection()
             cursor = conn.cursor()
             
             if self.use_postgres:
-                cursor.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s) RETURNING id", 
-                             (username, password_hash))
+                cursor.execute("INSERT INTO users (username, password_hash, user_class) VALUES (%s, %s, %s) RETURNING id", 
+                             (username, password_hash, user_class))
                 user_id = cursor.fetchone()[0]
             else:
-                cursor.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", 
-                             (username, password_hash))
+                cursor.execute("INSERT INTO users (username, password_hash, user_class) VALUES (?, ?, ?)", 
+                             (username, password_hash, user_class))
                 user_id = cursor.lastrowid
                 
             conn.commit()
@@ -174,17 +201,17 @@ class Database:
             cursor = conn.cursor()
             
             if self.use_postgres:
-                cursor.execute("SELECT id, mmr FROM users WHERE username = %s AND password_hash = %s", 
+                cursor.execute("SELECT id, mmr, user_class FROM users WHERE username = %s AND password_hash = %s", 
                              (username, password_hash))
             else:
-                cursor.execute("SELECT id, mmr FROM users WHERE username = ? AND password_hash = ?", 
+                cursor.execute("SELECT id, mmr, user_class FROM users WHERE username = ? AND password_hash = ?", 
                              (username, password_hash))
             
             result = cursor.fetchone()
             conn.close()
             
             if result:
-                return {'id': result[0], 'username': username, 'mmr': result[1]}
+                return {'id': result[0], 'username': username, 'mmr': result[1], 'user_class': result[2]}
             return None
         except Exception as e:
             try:
@@ -198,15 +225,15 @@ class Database:
         cursor = conn.cursor()
         
         if self.use_postgres:
-            cursor.execute("SELECT id, username, mmr FROM users WHERE id = %s", (user_id,))
+            cursor.execute("SELECT id, username, mmr, user_class FROM users WHERE id = %s", (user_id,))
         else:
-            cursor.execute("SELECT id, username, mmr FROM users WHERE id = ?", (user_id,))
+            cursor.execute("SELECT id, username, mmr, user_class FROM users WHERE id = ?", (user_id,))
         
         result = cursor.fetchone()
         conn.close()
         
         if result:
-            return {'id': result[0], 'username': result[1], 'mmr': result[2]}
+            return {'id': result[0], 'username': result[1], 'mmr': result[2], 'user_class': result[3]}
         return None
     
     def update_user_mmr(self, user_id, new_mmr):
